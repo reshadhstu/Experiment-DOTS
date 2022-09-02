@@ -3,7 +3,6 @@ using Unity.Entities;
 
 namespace Reshad.Components.Data
 {
-    [Serializable]
     public struct ProjectileLauncherData : IComponentData
     {
         public Entity Missile;

@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using Reshad.Components.Data;
 using Unity.Entities;
-using Unity.Mathematics;
 using UnityEngine;
 
 namespace Reshad.MonoAuthoring
@@ -11,6 +10,7 @@ namespace Reshad.MonoAuthoring
     {
         public GameObject aoePrefab;
         public float damageRadius;
+        [Range(30, 600)]
         public float damagePower;
 
         public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
@@ -18,8 +18,7 @@ namespace Reshad.MonoAuthoring
             dstManager.AddComponentData(entity, new AoeEffectData()
             {
                 AoePrefab = conversionSystem.GetPrimaryEntity(aoePrefab),
-                DamageRadius = damageRadius,
-                Target = math.lerp(0, damageRadius, 0.5f)
+                DamageRadius = damageRadius
             });
 
             dstManager.AddComponentData(entity, new AoePowerData()

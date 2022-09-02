@@ -6,6 +6,5 @@ namespace Reshad.Components.Data
     {
         public Entity AoePrefab;
         public float DamageRadius;
-        public float Target;
     }
 }
