@@ -1,7 +1,6 @@
-using System;
 using Unity.Entities;
 
-namespace Reshad.DataComponents
+namespace Reshad.Components.Data
 {
     [GenerateAuthoringComponent]
     public struct EnemyHealth : IComponentData

@@ -1,12 +1,12 @@
 using System;
 using Unity.Entities;
 
-namespace Reshad.Components_Tags
+namespace Reshad.Components.Data
 {
     [Serializable]
     public struct ProjectileLauncherData : IComponentData
     {
-        public Entity Bullet;
+        public Entity Missile;
         public float Strength;
         public float Rate;
         public float Duration;

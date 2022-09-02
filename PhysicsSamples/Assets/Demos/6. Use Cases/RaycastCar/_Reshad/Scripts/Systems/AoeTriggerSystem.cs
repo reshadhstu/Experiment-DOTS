@@ -1,9 +1,7 @@
-using Reshad.Components_Tags;
 using Reshad.Components.Data;
-using Reshad.DataComponents;
+using Reshad.Components.Tag;
 using Unity.Entities;
 using Unity.Physics.Stateful;
-using Unity.Transforms;
 using UnityEngine;
 
 namespace Reshad.Systems
@@ -70,19 +68,21 @@ namespace Reshad.Systems
 
                             if (!_hitEnemy)
                             {
-                                var enemyHealth = GetComponent<EnemyHealth>(otherEntity);
+                                var enemyHealthData = GetComponent<EnemyHealth>(otherEntity);
 
-                                if (_aoeDamagePower > enemyHealth.Value)
+                                var enemyHealth = enemyHealthData.Value;
+
+                                if (_aoeDamagePower >= enemyHealthData.Value)
                                 {
                                     commandBuffer.AddComponent(otherEntity, new DestroyEntityTag());
                                 }
                                 else
                                 {
-                                    enemyHealth.Value -= _aoeDamagePower;
-                                    SetComponent(otherEntity, enemyHealth);
+                                    enemyHealthData.Value -= _aoeDamagePower;
+                                    SetComponent(otherEntity, enemyHealthData);
                                 }
 
-                                SetSingleton(new AoePowerData {DamagePower = _aoeDamagePower - enemyHealth.Value});
+                                SetSingleton(new AoePowerData {DamagePower = _aoeDamagePower - enemyHealth});
 
                                 _hitEnemy = true;
                             }

@@ -1,15 +1,9 @@
-using Reshad.Components_Tags;
 using Reshad.Components.Data;
 using Reshad.Components.Tag;
-using Shouldly;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics.Stateful;
 using Unity.Transforms;
-using UnityEngine;
-
-//We did not need the ReferenceEntity so we deleted the IConvertGameObjectToEntity interface
-//and the TriggerVolumeChangeMaterial component
 
 namespace Reshad.Systems
 {
@@ -96,11 +90,6 @@ namespace Reshad.Systems
                                 _isAoeCreated = true;
                             }
                         }
-                        //The following is what happens on exit
-                        // else
-                        // {
-                        //     commandBuffer.AddComponent(otherEntity, new DestroyTag() {});
-                        // }
                     }
                     _isAoeCreated = false;
                 }).Run();

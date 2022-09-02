@@ -1,4 +1,4 @@
-using Reshad.Components_Tags;
+using Reshad.Components.Data;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
@@ -7,8 +7,6 @@ using UnityEngine;
 
 namespace Reshad.Systems
 {
-    // Update before physics gets going so that we don't have hazard warnings.
-    // This assumes that all gun are being controlled from the same single input system
     [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
     public partial class ProjectileSpawnSystem : SystemBase
     {
@@ -37,11 +35,7 @@ namespace Reshad.Systems
                 .WithBurst()
                 .ForEach((Entity _, int entityInQueryIndex, ref Rotation gunRotation, ref ProjectileLauncherData gun, in LocalToWorld gunTransform) =>
                 {
-                    // Handle input
-                    {
-                        //gun.IsFiring = input.Firing > 0f ? 1 : 0;
-                        gun.IsFiring = isGunFiring;
-                    }
+                    gun.IsFiring = isGunFiring;
 
                     if (gun.IsFiring == 0)
                     {
@@ -54,9 +48,9 @@ namespace Reshad.Systems
 
                     if ((gun.Duration > gun.Rate) || (gun.WasFiring == 0))
                     {
-                        if (gun.Bullet != null)
+                        if (gun.Missile != null)
                         {
-                            var newEntity = commandBuffer.Instantiate(entityInQueryIndex, gun.Bullet);
+                            var newEntity = commandBuffer.Instantiate(entityInQueryIndex, gun.Missile);
 
                             var position = new Translation { Value = gunTransform.Position + gunTransform.Forward };
 

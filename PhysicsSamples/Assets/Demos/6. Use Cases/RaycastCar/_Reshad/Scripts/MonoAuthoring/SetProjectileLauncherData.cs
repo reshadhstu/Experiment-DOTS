@@ -1,21 +1,21 @@
 using System.Collections.Generic;
-using Reshad.Components_Tags;
+using Reshad.Components.Data;
 using Unity.Entities;
 using UnityEngine;
 
-namespace Reshad.Authoring_Mono
+namespace Reshad.MonoAuthoring
 {
     [DisallowMultipleComponent]
     public class SetProjectileLauncherData : MonoBehaviour, IConvertGameObjectToEntity, IDeclareReferencedPrefabs
     {
-        public GameObject Bullet;
+        public GameObject missile;
 
-        public float Strength;
-        public float Rate;
+        public float strength;
+        public float rate;
 
         public void DeclareReferencedPrefabs(List<GameObject> referencedPrefabs)
         {
-            referencedPrefabs.Add(Bullet);
+            referencedPrefabs.Add(missile);
         }
 
         public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
@@ -24,9 +24,9 @@ namespace Reshad.Authoring_Mono
                 entity,
                 new ProjectileLauncherData()
                 {
-                    Bullet = conversionSystem.GetPrimaryEntity(Bullet),
-                    Strength = Strength,
-                    Rate = Rate,
+                    Missile = conversionSystem.GetPrimaryEntity(missile),
+                    Strength = strength,
+                    Rate = rate,
                     WasFiring = 0,
                     IsFiring = 0
                 });
