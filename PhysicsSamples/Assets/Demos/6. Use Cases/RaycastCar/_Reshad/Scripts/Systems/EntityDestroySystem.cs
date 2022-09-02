@@ -27,7 +27,7 @@ namespace Reshad.Systems
             //We could just query for a DestroyTag, but we might want to run different processes
             //if different entities are destroyed, so we made this one specifically for Asteroids
             Entities
-                .WithAll<DestroyTag>()
+                .WithAll<DestroyEntityTag>()
                 .ForEach((Entity entity, int entityInQueryIndex) =>
                 {
                     commandBuffer.DestroyEntity(entityInQueryIndex, entity);

@@ -6,6 +6,6 @@ namespace Reshad.DataComponents
     [GenerateAuthoringComponent]
     public struct EnemyHealth : IComponentData
     {
-        public int Value;
+        public float Value;
     }
 }

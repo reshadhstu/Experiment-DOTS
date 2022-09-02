@@ -1,9 +1,12 @@
 using Reshad.Components_Tags;
 using Reshad.Components.Data;
+using Reshad.Components.Tag;
+using Shouldly;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics.Stateful;
 using Unity.Transforms;
+using UnityEngine;
 
 //We did not need the ReferenceEntity so we deleted the IConvertGameObjectToEntity interface
 //and the TriggerVolumeChangeMaterial component
@@ -20,6 +23,8 @@ namespace Reshad.Systems
 
         private Entity _aoeEntity;
 
+        private bool _isAoeCreated;
+
         protected override void OnCreate()
         {
             _entityCommandBufferSystem = World.GetOrCreateSystem<EndFixedStepSimulationEntityCommandBufferSystem>();
@@ -33,6 +38,8 @@ namespace Reshad.Systems
                     }
                 })
             );
+
+            RequireSingletonForUpdate<MissileTag>();
         }
 
         protected override void OnStartRunning()
@@ -51,12 +58,12 @@ namespace Reshad.Systems
             Entities
                 .WithName("ProjectileTriggerSystem")
                 .WithoutBurst()
-                .ForEach((Entity e, ref DynamicBuffer<StatefulTriggerEvent> triggerEventBuffer) =>
+                .ForEach((Entity entity, ref DynamicBuffer<StatefulTriggerEvent> triggerEventBuffer) =>
                 {
                     for (int i = 0; i < triggerEventBuffer.Length; i++)
                     {
                         var triggerEvent = triggerEventBuffer[i];
-                        var otherEntity = triggerEvent.GetOtherEntity(e);
+                        var otherEntity = triggerEvent.GetOtherEntity(entity);
 
                         // exclude other triggers and processed events
                         if (triggerEvent.State == StatefulEventState.Stay || !nonTriggerMask.Matches(otherEntity))
@@ -66,23 +73,28 @@ namespace Reshad.Systems
 
                         if (triggerEvent.State == StatefulEventState.Enter)
                         {
-                            var entityPositionComponent = GetComponent<Translation>(e);
-
-                            var newTranslation = new Translation()
+                            if (!_isAoeCreated)
                             {
-                                Value = new float3(entityPositionComponent.Value.x, 0, entityPositionComponent.Value.z)
-                            };
+                                var entityPositionComponent = GetComponent<Translation>(entity);
 
-                            var newEntity = commandBuffer.Instantiate(_aoeEntity);
+                                var newTranslation = new Translation()
+                                {
+                                    Value = new float3(entityPositionComponent.Value.x, entityPositionComponent.Value.y, entityPositionComponent.Value.z)
+                                };
 
-                            var newScale = new Scale {Value = 1};
-                            commandBuffer.AddComponent<Scale>(newEntity);
+                                var newEntity = commandBuffer.Instantiate(_aoeEntity);
+
+                                var newScale = new Scale {Value = 1.0f};
+                                commandBuffer.AddComponent<Scale>(newEntity);
 
 
-                            commandBuffer.SetComponent(newEntity, newTranslation);
-                            commandBuffer.SetComponent(newEntity, newScale);
+                                commandBuffer.SetComponent(newEntity, newTranslation);
+                                commandBuffer.SetComponent(newEntity, newScale);
 
-                            commandBuffer.AddComponent(e, new DestroyTag());
+                                commandBuffer.AddComponent(entity, new DestroyEntityTag());
+
+                                _isAoeCreated = true;
+                            }
                         }
                         //The following is what happens on exit
                         // else
@@ -90,6 +102,7 @@ namespace Reshad.Systems
                         //     commandBuffer.AddComponent(otherEntity, new DestroyTag() {});
                         // }
                     }
+                    _isAoeCreated = false;
                 }).Run();
 
             _entityCommandBufferSystem.AddJobHandleForProducer(Dependency);

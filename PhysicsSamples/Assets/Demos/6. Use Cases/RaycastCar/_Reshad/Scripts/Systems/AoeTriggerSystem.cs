@@ -3,19 +3,23 @@ using Reshad.Components.Data;
 using Reshad.DataComponents;
 using Unity.Entities;
 using Unity.Physics.Stateful;
-using Unity.Rendering;
+using Unity.Transforms;
+using UnityEngine;
 
-namespace Reshad.Scripts.Systems
+namespace Reshad.Systems
 {
     [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
     [UpdateAfter(typeof(StatefulTriggerEventBufferSystem))]
+    [UpdateAfter(typeof(ProjectileTriggerSystem))]
     public partial class AoeTriggerSystem : SystemBase
     {
         private EndFixedStepSimulationEntityCommandBufferSystem _entityCommandBufferSystem;
 
         private EntityQueryMask _nonTriggerMask;
 
-        //private float _aoeDamagePower;
+        private float _aoeDamagePower;
+
+        private bool _hitEnemy;
 
         protected override void OnCreate()
         {
@@ -30,16 +34,15 @@ namespace Reshad.Scripts.Systems
                     }
                 })
             );
-        }
 
-        protected override void OnStartRunning()
-        {
-            //_aoeDamagePower = GetSingleton<AoeEffectData>().DamagePower;
+            RequireSingletonForUpdate<AoeTag>();
         }
 
         protected override void OnUpdate()
         {
             var commandBuffer = _entityCommandBufferSystem.CreateCommandBuffer();
+
+            _aoeDamagePower = GetSingleton<AoePowerData>().DamagePower;
 
             // Need this extra variable here so that it can
             // be captured by Entities.ForEach loop below
@@ -48,12 +51,12 @@ namespace Reshad.Scripts.Systems
             Entities
                 .WithName("AOE_TriggerSystem")
                 .WithoutBurst()
-                .ForEach((Entity e, ref DynamicBuffer<StatefulTriggerEvent> triggerEventBuffer, in EnemyHealth enemyHealth) =>
+                .ForEach((Entity entity, ref DynamicBuffer<StatefulTriggerEvent> triggerEventBuffer) =>
                 {
                     for (int i = 0; i < triggerEventBuffer.Length; i++)
                     {
                         var triggerEvent = triggerEventBuffer[i];
-                        var otherEntity = triggerEvent.GetOtherEntity(e);
+                        var otherEntity = triggerEvent.GetOtherEntity(entity);
 
                         // exclude other triggers and processed events
                         if (triggerEvent.State == StatefulEventState.Stay || !nonTriggerMask.Matches(otherEntity))
@@ -63,26 +66,29 @@ namespace Reshad.Scripts.Systems
 
                         if (triggerEvent.State == StatefulEventState.Enter)
                         {
-                            //if (_aoeDamagePower > enemyHealth.Value)
-                            //{
-                            //commandBuffer.AddComponent(otherEntity, new DestroyTag());
-                            //_aoeDamagePower -= enemyHealth;
-                            //}
+                            if (!HasComponent<EnemyTag>(otherEntity) || _aoeDamagePower <= 0) return;
 
-                            // var volumeRenderMesh = EntityManager.GetSharedComponentData<RenderMesh>(e);
-                            // var overlappingRenderMesh = EntityManager.GetSharedComponentData<RenderMesh>(otherEntity);
-                            // overlappingRenderMesh.material = volumeRenderMesh.material;
-                            //
-                            // commandBuffer.SetSharedComponent(otherEntity, overlappingRenderMesh);
+                            if (!_hitEnemy)
+                            {
+                                var enemyHealth = GetComponent<EnemyHealth>(otherEntity);
 
-                            //commandBuffer.AddComponent(otherEntity, new DestroyTag());
+                                if (_aoeDamagePower > enemyHealth.Value)
+                                {
+                                    commandBuffer.AddComponent(otherEntity, new DestroyEntityTag());
+                                }
+                                else
+                                {
+                                    enemyHealth.Value -= _aoeDamagePower;
+                                    SetComponent(otherEntity, enemyHealth);
+                                }
+
+                                SetSingleton(new AoePowerData {DamagePower = _aoeDamagePower - enemyHealth.Value});
+
+                                _hitEnemy = true;
+                            }
                         }
-                        //The following is what happens on exit
-                        // else
-                        // {
-                        //     commandBuffer.AddComponent(otherEntity, new DestroyTag() {});
-                        // }
                     }
+                    _hitEnemy = false;
                 }).Run();
 
             _entityCommandBufferSystem.AddJobHandleForProducer(Dependency);

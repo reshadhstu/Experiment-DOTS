@@ -8,54 +8,6 @@ namespace Reshad.Systems
     //[UpdateBefore(typeof(TransformSystemGroup))]
     public partial class EnemySpawnSystem : SystemBase
     {
-        // private SpawnEnemyData _spawnEnemyData;
-        //
-        // private BeginSimulationEntityCommandBufferSystem _ecbSystem;
-        //
-        // private EntityQuery _enemyEntityQuery;
-        //
-        // protected override void OnCreate()
-        // {
-        //     _enemyEntityQuery = GetEntityQuery(ComponentType.ReadWrite<EnemyTag>());
-        //
-        //     _ecbSystem = World.GetOrCreateSystem<BeginSimulationEntityCommandBufferSystem>();
-        // }
-        //
-        // protected override void OnStartRunning()
-        // {
-        //     _spawnEnemyData = GetSingleton<SpawnEnemyData>();
-        // }
-        //
-        // protected override void OnUpdate()
-        // {
-        //     var ecb = _ecbSystem.CreateCommandBuffer();
-        //
-        //     var count = _enemyEntityQuery.CalculateEntityCountWithoutFiltering();
-        //
-        //     Job
-        //         .WithCode(() =>
-        //     {
-        //         for (int i = count; i < _spawnEnemyData.Count; ++i)
-        //         {
-        //             //we then create a new translation component with the randomly generated x, y, and z values
-        //             //var pos = new Translation {Value = new float3(0, 0, 0)};
-        //
-        //             var newTranslation = new Translation()
-        //             {
-        //                 Value = _spawnEnemyData.RandomSpawnPos
-        //             };
-        //
-        //             //on our command buffer we record creating an entity from our Asteroid prefab
-        //             var newEntity = ecb.Instantiate(_spawnEnemyData.EnemyPrefab);
-        //
-        //             //we then set the Translation component of the Asteroid prefab equal to our new translation component
-        //             ecb.SetComponent(newEntity, newTranslation);
-        //         }
-        //     }).Schedule();
-        //
-        //     _ecbSystem.AddJobHandleForProducer(Dependency);
-        // }
-
         //This will be our query for Asteroids
         private EntityQuery _enemyEntityQuery;
 
